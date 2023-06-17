@@ -1,57 +1,101 @@
 use std::io::stdin;
 
-fn main() {
-    const COURSE_NAME: &str = "Rust Course";
-    const MAX_STUDENT: i8 = 2;
-    let mut student_db: Vec<Student> = Vec::new();
+const COURSE_NAME: &str = "Rust Course";
+const MAX_STUDENT: u8 = 2;
 
-    struct Student {
-        name: String,
-        age: u8,
+#[derive(Clone)]
+struct Student {
+    name: String,
+    age: u8,
+}
+
+// Function to add a new student to DB
+fn add_student() -> (Student, bool) {
+    print!("#### Adding New Student ####\n");
+    println!("Enter Student Name: ");
+
+    // Create empty object of student struct
+    let mut st = Student {
+        name: "".to_string(),
+        age: 0,
+    };
+
+    // Take user input for Student name
+    let mut input = String::new();
+    let _ = stdin().read_line(&mut input);
+
+    let student_name = &input[..input.len() - 1].trim();
+
+    // Check for minimum 3 character length for Student name
+    if student_name.len() < 3 {
+        println!(
+            "Student name cannot be less than 3 characters. Record not added.\n Please try again"
+        );
+        return (st, false);
+        // continue;
     }
+
+    // Take user input for Student Age
+    println!("Age of the Student");
+    let mut input = String::new();
+
+    let _ = stdin().read_line(&mut input);
+
+    let age = input.trim();
+    age.to_string().pop(); // Remove newline character
+
+    st.name = student_name.to_string();
+    st.age = age.parse().unwrap();
+
+    (st, true)
+}
+
+// Function to display students already enrolled in the course
+fn display_students_in_course(st_db: &[Student]) {
+    println!("\n\nStudents added in this course\n");
+    for i in st_db {
+        println!("Name: {}, Age: {}", i.name, i.age)
+    }
+}
+
+fn main() {
+    // Create a Vector to store students record
+    let mut student_db: Vec<Student> = Vec::new();
 
     println!("###############################");
     println!("#  Welcome to {}", COURSE_NAME);
     println!("###############################");
 
     let mut i: i8 = 1;
-    while true {
-        print!("#### Adding New Student ####\n");
-        println!("Enter Student Name: ");
-
-        let mut input = String::new();
-        let _b1 = stdin().read_line(&mut input);
-
-        // TODO Check for max number of students tha can be added.
-
-        // Check for minimum 3 character length for Student name
-        let student_name = &input[..input.len() - 1].trim();
-        if student_name.len() < 3 {
+    loop {
+        // Check for max number of students tha can be added.
+        let db_length = u8::try_from(student_db.len()).ok();
+        if db_length >= Some(MAX_STUDENT) {
+            // Already added max students that can be enrolled. Display the contents of Student DB and Exit
             println!(
-                "Student name cannot be less than 3 haracter. Record not added.\n Please try again"
+                "Sorry! Only {} students can be added to the course.\nYou have already added {} students in the Course.",
+                MAX_STUDENT, db_length.unwrap()
             );
+
+            // Display students DB
+            display_students_in_course(&student_db);
+            break;
+        }
+
+        // Add student to course
+        let (st, err) = add_student();
+
+        // Check for error. If error, continue the loop
+        if !err {
             continue;
         }
 
-        // Ask for age of the student
-        println!("Age of the Student");
-        let mut input = String::new();
+        // Add new student to student DB
+        student_db.push(st.clone());
 
-        stdin().read_line(&mut input);
-
-        let age = input.trim();
-        age.to_string().pop(); // Remove newline character
-        let st = Student {
-            name: student_name.to_string(),
-            age: age.parse().unwrap(),
-        };
-
-        student_db.push(st);
-
-        println!("Length of student: {}", student_name.len());
         println!(
             "#### Added student '{}' with student number {} to Course ####",
-            student_name, i
+            st.name, i
         );
 
         println!("Press any key to Continue. Press q to Exit");
@@ -62,10 +106,7 @@ fn main() {
 
         if exit_var == "q" {
             println!("Exiting...");
-            println!("\n\n\n\nStudents added in this course\n");
-            for i in student_db {
-                println!("Name: {}, Age: {}", i.name, i.age)
-            }
+            display_students_in_course(&student_db);
             break;
         }
         i += 1;
