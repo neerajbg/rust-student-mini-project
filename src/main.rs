@@ -10,15 +10,9 @@ struct Student {
 }
 
 // Function to add a new student to DB
-fn add_student() -> (Student, bool) {
+fn add_student() -> Result<Student, &'static str> {
     print!("#### Adding New Student ####\n");
     println!("Enter Student Name: ");
-
-    // Create empty object of student struct
-    let mut st = Student {
-        name: "".to_string(),
-        age: 0,
-    };
 
     // Take user input for Student name
     let mut input = String::new();
@@ -31,7 +25,7 @@ fn add_student() -> (Student, bool) {
         println!(
             "Student name cannot be less than 3 characters. Record not added.\n Please try again"
         );
-        return (st, false);
+        return Err("Student's name too short");
         // continue;
     }
 
@@ -43,11 +37,12 @@ fn add_student() -> (Student, bool) {
 
     let age = input.trim();
     age.to_string().pop(); // Remove newline character
+    let age = age.parse().map_err(|_| "Cannot parse student's age")?;
 
-    st.name = student_name.to_string();
-    st.age = age.parse().unwrap();
-
-    (st, true)
+    Ok(Student {
+        name: student_name.to_string(),
+        age,
+    })
 }
 
 // Function to display students already enrolled in the course
@@ -83,19 +78,17 @@ fn main() {
         }
 
         // Add student to course
-        let (st, err) = add_student();
-
-        // Check for error. If error, continue the loop
-        if !err {
+        let student = if let Ok(student) = add_student() {
+            student
+        } else {
             continue;
-        }
-
-        // Add new student to student DB
-        student_db.push(st.clone());
+        };
+        
+        student_db.push(student.clone());
 
         println!(
             "#### Added student '{}' with student number {} to Course ####",
-            st.name, i
+            student.name, i
         );
 
         println!("Press any key to Continue. Press q to Exit");
