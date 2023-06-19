@@ -1,4 +1,6 @@
-use std::io::stdin;
+mod db;
+
+use std::{io::stdin, str::FromStr};
 
 const COURSE_NAME: &str = "Rust Course";
 const MAX_STUDENT: u8 = 2;
@@ -9,35 +11,26 @@ struct Student {
     age: u8,
 }
 
-// Function to add a new student to DB
-fn add_student() -> Result<Student, &'static str> {
-    print!("#### Adding New Student ####\n");
-    println!("Enter Student Name: ");
-
-    // Take user input for Student name
+fn prompt_input<T: FromStr>(prompt: &str) -> Result<T, &'static str> {
+    println!("{}: ", prompt);
     let mut input = String::new();
     let _ = stdin().read_line(&mut input);
+    input.trim().parse().map_err(|_| "Cannot parse input")
+}
 
-    let student_name = &input[..input.len() - 1].trim();
+fn input_student() -> Result<Student, &'static str> {
+    print!("#### Adding New Student ####\n");
 
+    let student_name: String = prompt_input("Enter Student Name")?;
     // Check for minimum 3 character length for Student name
     if student_name.len() < 3 {
         println!(
             "Student name cannot be less than 3 characters. Record not added.\n Please try again"
         );
         return Err("Student's name too short");
-        // continue;
     }
 
-    // Take user input for Student Age
-    println!("Age of the Student");
-    let mut input = String::new();
-
-    let _ = stdin().read_line(&mut input);
-
-    let age = input.trim();
-    age.to_string().pop(); // Remove newline character
-    let age = age.parse().map_err(|_| "Cannot parse student's age")?;
+    let age = prompt_input("Age of the Student")?;
 
     Ok(Student {
         name: student_name.to_string(),
@@ -45,17 +38,9 @@ fn add_student() -> Result<Student, &'static str> {
     })
 }
 
-// Function to display students already enrolled in the course
-fn display_students_in_course(st_db: &[Student]) {
-    println!("\n\nStudents added in this course\n");
-    for i in st_db {
-        println!("Name: {}, Age: {}", i.name, i.age)
-    }
-}
-
 fn main() {
     // Create a Vector to store students record
-    let mut student_db: Vec<Student> = Vec::new();
+    let mut student_db = db::StudentDatabase::new();
 
     println!("###############################");
     println!("#  Welcome to {}", COURSE_NAME);
@@ -71,19 +56,17 @@ fn main() {
                 MAX_STUDENT, db_length.unwrap()
             );
 
-            // Display students DB
-            display_students_in_course(&student_db);
             break;
         }
 
         // Add student to course
-        let student = if let Ok(student) = add_student() {
+        let student = if let Ok(student) = input_student() {
             student
         } else {
             continue;
         };
-        
-        student_db.push(student.clone());
+
+        student_db.add(student.name.clone(), student.age);
 
         println!(
             "#### Added student '{}' with student number {} to Course ####",
@@ -101,5 +84,5 @@ fn main() {
         }
     }
     println!("Exiting...");
-    display_students_in_course(&student_db);
+    student_db.display();
 }
