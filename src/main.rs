@@ -61,8 +61,7 @@ fn main() {
     println!("#  Welcome to {}", COURSE_NAME);
     println!("###############################");
 
-    let mut i: i8 = 1;
-    loop {
+    for i in 1usize.. {
         // Check for max number of students tha can be added.
         let db_length = u8::try_from(student_db.len()).ok();
         if db_length >= Some(MAX_STUDENT) {
@@ -98,10 +97,9 @@ fn main() {
         let exit_var = &input[0..input.len() - 1];
 
         if exit_var == "q" {
-            println!("Exiting...");
-            display_students_in_course(&student_db);
             break;
         }
-        i += 1;
     }
+    println!("Exiting...");
+    display_students_in_course(&student_db);
 }
