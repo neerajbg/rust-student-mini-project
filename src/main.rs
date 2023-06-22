@@ -1,6 +1,6 @@
 mod db;
 
-use std::{io::stdin, str::FromStr};
+use std::{io::{stdin, stdout}, str::FromStr};
 
 const COURSE_NAME: &str = "Rust Course";
 const MAX_STUDENT: u8 = 2;
@@ -84,5 +84,5 @@ fn main() {
         }
     }
     println!("Exiting...");
-    student_db.display();
+    student_db.display_on(&mut stdout()).expect("Unexpected output failure");
 }
