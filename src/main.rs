@@ -10,7 +10,7 @@ struct Student {
 }
 
 // Function to add a new student to DB
-fn add_student() -> (Student, bool) {
+fn add_student() -> Result<Student, bool> {
     print!("#### Adding New Student ####\n");
     println!("Enter Student Name: ");
 
@@ -31,8 +31,8 @@ fn add_student() -> (Student, bool) {
         println!(
             "Student name cannot be less than 3 characters. Record not added.\n Please try again"
         );
-        return (st, false);
-        // continue;
+
+        return Err(false);
     }
 
     // Take user input for Student Age
@@ -42,12 +42,11 @@ fn add_student() -> (Student, bool) {
     let _ = stdin().read_line(&mut input);
 
     let age = input.trim();
-    age.to_string().pop(); // Remove newline character
 
     st.name = student_name.to_string();
     st.age = age.parse().unwrap();
 
-    (st, true)
+    Ok(st)
 }
 
 // Function to display students already enrolled in the course
@@ -69,12 +68,12 @@ fn main() {
     let mut i: i8 = 1;
     loop {
         // Check for max number of students tha can be added.
-        let db_length = u8::try_from(student_db.len()).ok();
-        if db_length >= Some(MAX_STUDENT) {
+        let db_length = student_db.len() as u8;
+        if db_length >= MAX_STUDENT {
             // Already added max students that can be enrolled. Display the contents of Student DB and Exit
             println!(
                 "Sorry! Only {} students can be added to the course.\nYou have already added {} students in the Course.",
-                MAX_STUDENT, db_length.unwrap()
+                MAX_STUDENT, db_length
             );
 
             // Display students DB
@@ -83,12 +82,12 @@ fn main() {
         }
 
         // Add student to course
-        let (st, err) = add_student();
 
         // Check for error. If error, continue the loop
-        if !err {
-            continue;
-        }
+        let st = match add_student() {
+            Err(_) => continue,
+            Ok(st) => st, // Ok(st) => st;
+        };
 
         // Add new student to student DB
         student_db.push(st.clone());
