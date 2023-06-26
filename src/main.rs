@@ -22,7 +22,11 @@ fn add_student() -> Result<Student, bool> {
 
     // Take user input for Student name
     let mut input = String::new();
-    let _ = stdin().read_line(&mut input);
+
+    match stdin().read_line(&mut input) {
+        Ok(_n) => {}
+        Err(_error) => println!("Something went wrong!"),
+    };
 
     let student_name = &input[..input.len() - 1].trim();
 
@@ -39,12 +43,15 @@ fn add_student() -> Result<Student, bool> {
     println!("Age of the Student");
     let mut input = String::new();
 
-    let _ = stdin().read_line(&mut input);
+    match stdin().read_line(&mut input) {
+        Ok(_n) => {}
+        Err(_error) => println!("Something went wrong!"),
+    };
 
-    let age = input.trim();
+    let age = input.trim().parse().unwrap_or_default();
 
     st.name = student_name.to_string();
-    st.age = age.parse().unwrap();
+    st.age = age;
 
     Ok(st)
 }
@@ -52,8 +59,9 @@ fn add_student() -> Result<Student, bool> {
 // Function to display students already enrolled in the course
 fn display_students_in_course(st_db: &[Student]) {
     println!("\n\nStudents added in this course\n");
-    for i in st_db {
-        println!("Name: {}, Age: {}", i.name, i.age)
+
+    for item in st_db.iter() {
+        println!("Name: {}, Age: {}", item.name, item.age)
     }
 }
 
@@ -99,10 +107,15 @@ fn main() {
 
         println!("Press any key to Continue. Press q to Exit");
         let mut input = String::new();
-        let _b1 = std::io::stdin().read_line(&mut input).unwrap();
+
+        match stdin().read_line(&mut input) {
+            Ok(_n) => {}
+            Err(_error) => println!("Something went wrong!"),
+        }
 
         let exit_var = &input[0..input.len() - 1];
 
+        println!("{}Exit", exit_var);
         if exit_var == "q" {
             println!("Exiting...");
             display_students_in_course(&student_db);
