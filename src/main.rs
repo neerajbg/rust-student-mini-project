@@ -3,22 +3,16 @@ use std::io::stdin;
 const COURSE_NAME: &str = "Rust Course";
 const MAX_STUDENT: u8 = 2;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 struct Student {
     name: String,
     age: u8,
 }
 
 // Function to add a new student to DB
-fn add_student() -> Result<Student, bool> {
+fn add_student() -> Option<Student> {
     print!("#### Adding New Student ####\n");
     println!("Enter Student Name: ");
-
-    // Create empty object of student struct
-    let mut st = Student {
-        name: "".to_string(),
-        age: 0,
-    };
 
     // Take user input for Student name
     let mut input = String::new();
@@ -36,7 +30,7 @@ fn add_student() -> Result<Student, bool> {
             "Student name cannot be less than 3 characters. Record not added.\n Please try again"
         );
 
-        return Err(false);
+        return None;
     }
 
     // Take user input for Student Age
@@ -50,10 +44,11 @@ fn add_student() -> Result<Student, bool> {
 
     let age = input.trim().parse().unwrap_or_default();
 
-    st.name = student_name.to_string();
-    st.age = age;
-
-    Ok(st)
+    // Create  object of student struct and return
+    return Some(Student {
+        name: student_name.to_string(),
+        age,
+    });
 }
 
 // Function to display students already enrolled in the course
@@ -92,9 +87,13 @@ fn main() {
         // Add student to course
 
         // Check for error. If error, continue the loop
-        let st = match add_student() {
-            Err(_) => continue,
-            Ok(st) => st, // Ok(st) => st;
+        // let st = Some(())match add_student() {
+        //     Err(_) => continue,
+        //     Ok(st) => st, // Ok(st) => st;
+        // };
+
+        let Some(st )= add_student() else {
+            continue;
         };
 
         // Add new student to student DB
@@ -115,7 +114,6 @@ fn main() {
 
         let exit_var = &input[0..input.len() - 1];
 
-        println!("{}Exit", exit_var);
         if exit_var == "q" {
             println!("Exiting...");
             display_students_in_course(&student_db);
