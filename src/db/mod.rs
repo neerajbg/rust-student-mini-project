@@ -1,4 +1,4 @@
-use std::io::stdin;
+use std::io::{stdin, Write};
 
 use crate::COURSE_NAME;
 
@@ -17,6 +17,10 @@ impl Student {
     // Private function to print student profile
     fn print_profile(&self) {
         println!("Name: {}, Age: {}", self.name, self.age)
+    }
+
+    fn tabbed_record(&self) -> String {
+        format!("name:{}\tage:{}\n", self.name, self.age)
     }
 }
 
@@ -75,4 +79,21 @@ pub fn display_students_in_course(st_db: &[Student]) {
     for item in st_db.iter() {
         item.print_profile();
     }
+
+    // Save to db.db file
+    save_to_file(st_db);
+}
+
+// Function to save student db in file
+fn save_to_file(st_db: &[Student]) {
+    let mut file_conent = String::new();
+
+    for item in st_db.iter() {
+        file_conent.push_str(item.tabbed_record().as_str());
+    }
+
+    let mut file = std::fs::File::create("db.db").expect("Could'nt create the file");
+
+    file.write_all(file_conent.as_bytes())
+        .expect("Error in writting to file");
 }
