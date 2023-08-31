@@ -5,7 +5,7 @@ use crate::COURSE_NAME;
 #[derive(Clone, Default)]
 pub struct Student {
     pub name: String,
-    age: u8,
+    pub age: u8,
 }
 
 impl Student {
