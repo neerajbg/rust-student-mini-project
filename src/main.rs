@@ -1,71 +1,19 @@
-use std::io::{stdin, BufRead, BufReader};
+use std::io::stdin;
 
 pub const COURSE_NAME: &str = "Rust Course";
 const MAX_STUDENT: u8 = 3;
 
 pub mod db;
 
-// Read from db file
-fn read_db() -> Vec<db::Student> {
-    let file_name = "db.db";
-
-    let file = match std::fs::File::open(file_name) {
-        Ok(file) => file,
-        Err(error) => {
-            panic!("Error reading file. {}", error);
-        }
-    };
-
-    // Vector to hold students record
-    let mut student_db: Vec<db::Student> = Vec::new();
-
-    // Create a Reader
-    let reader = BufReader::new(file);
-
-    // Iterate through the file and convert file string into vector of student
-    for line in reader.lines() {
-        let line = line.expect("Error in reading line");
-
-        // Split with tabs
-        let tabbed_lines = line.split("\t");
-
-        let collection = tabbed_lines.collect::<Vec<&str>>();
-
-        // Split with ":"
-
-        // Variables to hold name and Age of existing students
-        let mut name = String::new();
-        let mut age = String::new();
-
-        for item in collection {
-            let temp_line = item.split(":");
-            let data = temp_line.collect::<Vec<&str>>();
-
-            // println!("{}\n", st1[0]);
-
-            if data[0] == "name" {
-                name = data[1].to_string();
-            } else if data[0] == "age" {
-                age = data[1].to_string();
-            }
-        }
-
-        let age1 = age.parse::<u8>().unwrap();
-
-        let temp_st = db::Student::new(name, age1);
-        student_db.push(temp_st);
-    }
-
-    // Return students vector
-    student_db
-}
-
 fn main() {
-    // Create a Vector to store students record
-    // let mut student_db: Vec<db::Student> = Vec::new();
-
-    // Read existing sudents in the course
-    let mut student_db = read_db();
+    // Read existing sudents in the course from db file
+    let mut student_db = match db::parse_db::read_db() {
+        Ok(db_data) => db_data,
+        Err(_err) => {
+            println!("{}", _err);
+            Vec::new()
+        } // return a new Vector of students in case of error
+    };
 
     println!("###############################");
     println!("#  Welcome to {}", COURSE_NAME);

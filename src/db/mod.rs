@@ -2,6 +2,7 @@ use std::io::{stdin, Write};
 
 use crate::COURSE_NAME;
 
+pub mod parse_db;
 #[derive(Clone, Default)]
 pub struct Student {
     pub name: String,
@@ -81,19 +82,34 @@ pub fn display_students_in_course(st_db: &[Student]) {
     }
 
     // Save to db.db file
-    save_to_file(st_db);
+    match save_to_db_file(st_db) {
+        Ok(_ok) => println!("DB created."),
+        Err(_err) => println!("{}", _err),
+    }
 }
 
 // Function to save student db in file
-fn save_to_file(st_db: &[Student]) {
+fn save_to_db_file(st_db: &[Student]) -> Result<bool, &str> {
     let mut file_conent = String::new();
 
     for item in st_db.iter() {
         file_conent.push_str(item.tabbed_record().as_str());
     }
 
-    let mut file = std::fs::File::create("db.db").expect("Could'nt create the file");
+    let mut file = match std::fs::File::create("db.db") {
+        Ok(file) => file,
+        Err(_err) => {
+            return Err("Couldnt create the file.");
+        }
+    };
 
-    file.write_all(file_conent.as_bytes())
-        .expect("Error in writting to file");
+    match file.write_all(file_conent.as_bytes()) {
+        Ok(_ok) => return Ok(true),
+        Err(_err) => {
+            return Err("Couldnt write to file.");
+        }
+    }
+    // .expect("Error in writting to file");
+
+    // Ok(true)
 }
